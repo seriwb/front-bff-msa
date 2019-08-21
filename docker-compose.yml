@@ -1,0 +1,100 @@
+version: '3.7'
+services:
+  msa-dev:
+    build:
+      context: ./msa
+      target: msa-builder
+    image: web-app/msa-dev
+    container_name: web-app_msa-dev
+    command: /bin/ash
+    tty: true
+    working_dir: "/go/src/github.com/seriwb/front-bff-msa/msa"
+    volumes:
+      - ./msa:/go/src/github.com/seriwb/front-bff-msa/msa:cached
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+  msa:
+    build:
+      context: ./msa
+      target: msa-server
+    image: web-app/msa
+    container_name: web-app_msa
+    command: /bin/ash
+    tty: true
+    working_dir: "/web-app/msa"
+    volumes:
+      - ./msa/build:/web-app/msa:cached
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - msa-dev
+
+  bff-dev:
+    build:
+      context: ./bff
+      target: bff-builder
+    image: web-app/bff-dev
+    container_name: web-app_bff-dev
+    command: /bin/ash
+    tty: true
+    working_dir: "/go/src/github.com/seriwb/front-bff-msa/bff"
+    volumes:
+      - ./bff:/go/src/github.com/seriwb/front-bff-msa/bff:cached
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+
+  bff:
+    build:
+      context: ./bff
+      target: bff-server
+    image: web-app/bff
+    container_name: web-app_bff
+    command: /bin/ash
+    tty: true
+    working_dir: "/web-app/bff"
+    volumes:
+      - ./bff/build:/web-app/bff:cached
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - bff-dev
+
+  front:
+    build:
+      context: ./front
+    image: web-app/front
+    container_name: web-app_front
+    command: /bin/bash -c "yarn && yarn run dev"
+    #command: /bin/bash -c "yarn && /bin/bash"
+    tty: true
+    working_dir: "/web-app/front"
+    volumes:
+      - ./front:/web-app/front:cached
+    ports:
+      - "3000:3000"
+    depends_on:
+      - bff
+
+  db:
+    image: mysql:8
+    container_name: web-app_db
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "admin"
+    volumes:
+      - ./mysql/sql:/docker-entrypoint-initdb.d
+      - ./mysql/conf.d:/etc/mysql/conf.d
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/tmp/data:/tmp/data
+      - ./mysql/log:/var/log/mysql
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
