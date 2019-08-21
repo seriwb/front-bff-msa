@@ -6,7 +6,7 @@ services:
       target: msa-builder
     image: web-app/msa-dev
     container_name: web-app_msa-dev
-    command: /bin/ash
+    command: /bin/bash
     tty: true
     working_dir: "/go/src/github.com/seriwb/front-bff-msa/msa"
     volumes:
@@ -39,7 +39,7 @@ services:
       target: bff-builder
     image: web-app/bff-dev
     container_name: web-app_bff-dev
-    command: /bin/ash
+    command: /bin/bash
     tty: true
     working_dir: "/go/src/github.com/seriwb/front-bff-msa/bff"
     volumes:

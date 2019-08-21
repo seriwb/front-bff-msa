@@ -8,7 +8,7 @@ RUN apt-get update \
 
 WORKDIR /web-app/front
 
-COPY ./front .
+COPY . .
 
 RUN yarn install
 
