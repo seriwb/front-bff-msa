@@ -1,0 +1,29 @@
+// Code generated with goa v3.0.4, DO NOT EDIT.
+//
+// some-function protocol buffer definition
+//
+// Command:
+// $ goa gen github.com/seriwb/front-bff-msa/msa/design
+
+syntax = "proto3";
+
+package some_function;
+
+option go_package = "some_functionpb";
+
+// The calc service performs operations on numbers.
+service SomeFunction {
+	// Add implements add.
+	rpc Add (AddRequest) returns (AddResponse);
+}
+
+message AddRequest {
+	// Left operand
+	sint32 a = 1;
+	// Right operand
+	sint32 b = 2;
+}
+
+message AddResponse {
+	sint32 field = 1;
+}

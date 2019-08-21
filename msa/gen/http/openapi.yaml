@@ -1,0 +1,26 @@
+swagger: "2.0"
+info:
+  title: Some function Service
+  description: Service for adding numbers, a Goa teaser
+  version: ""
+host: localhost:8080
+consumes:
+- application/json
+- application/xml
+- application/gob
+produces:
+- application/json
+- application/xml
+- application/gob
+paths:
+  /openapi.json:
+    get:
+      summary: Download ./gen/http/openapi.json
+      operationId: some-function#/openapi.json
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+      schemes:
+      - http
