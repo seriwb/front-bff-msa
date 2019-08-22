@@ -19,6 +19,7 @@ require (
 	github.com/stretchr/testify v1.4.0 // indirect
 	go.mongodb.org/mongo-driver v1.1.0 // indirect
 	goa.design/goa/v3 v3.0.4
+	goa.design/plugins/v3 v3.0.4
 	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586 // indirect
 	golang.org/x/mobile v0.0.0-20190814143026-e8b3e6111d02 // indirect
 	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7 // indirect

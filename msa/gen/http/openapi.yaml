@@ -3,7 +3,7 @@ info:
   title: Some function Service
   description: Service for adding numbers, a Goa teaser
   version: ""
-host: localhost:8080
+host: localhost:8000
 consumes:
 - application/json
 - application/xml

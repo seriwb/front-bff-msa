@@ -56,7 +56,7 @@ func handleHTTPServer(ctx context.Context, u *url.URL, someFunctionEndpoints *so
 		someFunctionServer = somefunctionsvr.New(nil, mux, dec, enc, eh)
 	}
 	// Configure the mux.
-	somefunctionsvr.Mount(mux)
+	somefunctionsvr.Mount(mux, someFunctionServer)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
 	// here apply to all the service endpoints.

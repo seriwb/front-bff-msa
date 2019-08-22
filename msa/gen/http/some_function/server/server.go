@@ -13,11 +13,13 @@ import (
 
 	somefunction "github.com/seriwb/front-bff-msa/msa/gen/some_function"
 	goahttp "goa.design/goa/v3/http"
+	"goa.design/plugins/v3/cors"
 )
 
 // Server lists the some-function service endpoint HTTP handlers.
 type Server struct {
 	Mounts []*MountPoint
+	CORS   http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -47,8 +49,10 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
+			{"CORS", "OPTIONS", "/openapi.json"},
 			{"./gen/http/openapi.json", "GET", "/openapi.json"},
 		},
+		CORS: NewCORSHandler(),
 	}
 }
 
@@ -57,10 +61,12 @@ func (s *Server) Service() string { return "some-function" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
+	s.CORS = m(s.CORS)
 }
 
 // Mount configures the mux to serve the some-function endpoints.
-func Mount(mux goahttp.Muxer) {
+func Mount(mux goahttp.Muxer, h *Server) {
+	MountCORSHandler(mux, h.CORS)
 	MountGenHTTPOpenapiJSON(mux, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./gen/http/openapi.json")
 	}))
@@ -69,5 +75,55 @@ func Mount(mux goahttp.Muxer) {
 // MountGenHTTPOpenapiJSON configures the mux to serve GET request made to
 // "/openapi.json".
 func MountGenHTTPOpenapiJSON(mux goahttp.Muxer, h http.Handler) {
-	mux.Handle("GET", "/openapi.json", h.ServeHTTP)
+	mux.Handle("GET", "/openapi.json", handleSomeFunctionOrigin(h).ServeHTTP)
+}
+
+// MountCORSHandler configures the mux to serve the CORS endpoints for the
+// service some-function.
+func MountCORSHandler(mux goahttp.Muxer, h http.Handler) {
+	h = handleSomeFunctionOrigin(h)
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("OPTIONS", "/openapi.json", f)
+}
+
+// NewCORSHandler creates a HTTP handler which returns a simple 200 response.
+func NewCORSHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	})
+}
+
+// handleSomeFunctionOrigin applies the CORS response headers corresponding to
+// the origin for the service some-function.
+func handleSomeFunctionOrigin(h http.Handler) http.Handler {
+	origHndlr := h.(http.HandlerFunc)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			origHndlr(w, r)
+			return
+		}
+		if cors.MatchOrigin(origin, "localhost") {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Vary", "Origin")
+			w.Header().Set("Access-Control-Expose-Headers", "X-Time")
+			w.Header().Set("Access-Control-Max-Age", "600")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			if acrm := r.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+				w.Header().Set("Access-Control-Allow-Headers", "*")
+			}
+			origHndlr(w, r)
+			return
+		}
+		origHndlr(w, r)
+		return
+	})
 }

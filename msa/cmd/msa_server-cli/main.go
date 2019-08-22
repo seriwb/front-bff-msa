@@ -33,7 +33,7 @@ func main() {
 		if addr == "" {
 			switch *hostF {
 			case "localhost":
-				addr = "http://localhost:80"
+				addr = "http://localhost:8000"
 			default:
 				fmt.Fprintf(os.Stderr, "invalid host argument: %q (valid hosts: localhost)", *hostF)
 				os.Exit(1)

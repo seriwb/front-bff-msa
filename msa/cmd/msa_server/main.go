@@ -72,6 +72,28 @@ func main() {
 	switch *hostF {
 	case "localhost":
 		{
+			addr := "http://localhost:8000"
+			u, err := url.Parse(addr)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "invalid URL %#v: %s", addr, err)
+				os.Exit(1)
+			}
+			if *secureF {
+				u.Scheme = "https"
+			}
+			if *domainF != "" {
+				u.Host = *domainF
+			}
+			if *httpPortF != "" {
+				h := strings.Split(u.Host, ":")[0]
+				u.Host = h + ":" + *httpPortF
+			} else if u.Port() == "" {
+				u.Host += ":80"
+			}
+			handleHTTPServer(ctx, u, someFunctionEndpoints, &wg, errc, logger, *dbgF)
+		}
+
+		{
 			addr := "grpc://localhost:8080"
 			u, err := url.Parse(addr)
 			if err != nil {
@@ -91,28 +113,6 @@ func main() {
 				u.Host += ":8080"
 			}
 			handleGRPCServer(ctx, u, someFunctionEndpoints, &wg, errc, logger, *dbgF)
-		}
-
-		{
-			addr := "http://localhost:80"
-			u, err := url.Parse(addr)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "invalid URL %#v: %s", addr, err)
-				os.Exit(1)
-			}
-			if *secureF {
-				u.Scheme = "https"
-			}
-			if *domainF != "" {
-				u.Host = *domainF
-			}
-			if *httpPortF != "" {
-				h := strings.Split(u.Host, ":")[0]
-				u.Host = h + ":" + *httpPortF
-			} else if u.Port() == "" {
-				u.Host += ":80"
-			}
-			handleHTTPServer(ctx, u, someFunctionEndpoints, &wg, errc, logger, *dbgF)
 		}
 
 	default:
