@@ -1,3 +1,6 @@
 /mysql/data
 /mysql/log
 /mysql/tmp
+
+go.mod
+go.sum

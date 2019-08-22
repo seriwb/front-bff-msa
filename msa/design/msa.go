@@ -7,11 +7,11 @@ import (
 var _ = API("msa", func() {
 	Title("Some function Service")
 	Description("Service for adding numbers, a Goa teaser")
-    Server("msa-server", func() {
-        Host("localhost", func() {
-            URI("grpc://localhost:8080")
-        })
-    })
+	Server("msa-server", func() {
+		Host("localhost", func() {
+			URI("grpc://localhost:8080")
+		})
+	})
 })
 
 var _ = Service("some-function", func() {

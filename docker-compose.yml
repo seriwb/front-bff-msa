@@ -71,8 +71,8 @@ services:
       context: ./front
     image: web-app/front
     container_name: web-app_front
-    command: /bin/bash -c "yarn && yarn run dev"
-    #command: /bin/bash -c "yarn && /bin/bash"
+    #command: /bin/bash -c "yarn && yarn run dev"
+    command: /bin/bash -c "yarn && /bin/bash"
     tty: true
     working_dir: "/web-app/front"
     volumes:
